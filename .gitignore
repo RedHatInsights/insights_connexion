@@ -1,0 +1,21 @@
+*[#]*[#]
+*[#]*
+*~
+*#
+
+*.bak
+
+#vim stuff
+*.swp
+*.swo
+Session.vim
+tags
+.agignore
+.vimrc
+.tern-project
+
+#intellij
+.idea
+
+#python
+*.pyc
