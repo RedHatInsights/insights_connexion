@@ -9,7 +9,6 @@ from time import sleep
 logging.basicConfig(
     level=config.log_level, format='%(asctime)s | %(levelname)s | %(message)s')
 
-
 PORT = config.port
 
 
@@ -59,6 +58,7 @@ def start_server():
 
 def test():
     try:
+
         logging.info('Testing...')
         start_server()
         run_oatts()
