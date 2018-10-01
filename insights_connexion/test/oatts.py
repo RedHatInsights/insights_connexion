@@ -1,4 +1,4 @@
-from .config import config
+from ..config import config
 import logging
 import os
 import shutil
