@@ -7,7 +7,7 @@ import sys
 config_parser = configparser.ConfigParser()
 config_parser.read('config.ini')
 
-if sys.argv[0] == 'test/test.py':
+if 'test' in sys.argv[0]:
     tag_env = 'test'
 else:
     tag_env = os.environ.get('INSIGHTS_CONNEXION_ENV', 'dev')
