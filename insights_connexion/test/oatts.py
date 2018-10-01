@@ -9,7 +9,8 @@ from time import sleep
 logging.basicConfig(
     level=config.log_level, format='%(asctime)s | %(levelname)s | %(message)s')
 
-PORT = 8081
+
+PORT = config.port
 
 
 def rm_gen_dir():
