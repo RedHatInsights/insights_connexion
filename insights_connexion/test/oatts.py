@@ -5,17 +5,11 @@ import shutil
 import subprocess
 from subprocess import CalledProcessError, Popen
 from time import sleep
-from factories.tags import TagFactory
 
 logging.basicConfig(
     level=config.log_level, format='%(asctime)s | %(levelname)s | %(message)s')
 
 PORT = 8081
-
-
-def seed():
-    logging.info('Seeding')
-    TagFactory()
 
 
 def rm_gen_dir():
@@ -62,9 +56,7 @@ def start_server():
     sleep(5)
 
 
-if __name__ == '__main__':
-    seed()
-
+def test():
     try:
         logging.info('Testing...')
         start_server()
