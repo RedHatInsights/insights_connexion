@@ -4,7 +4,7 @@ with open('README.md', 'r') as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='insights-connexion',
+    name='insights_connexion',
     version='0.0.1',
     author='Chris Kyrouac',
     author_email='ckyrouac@redhat.com',
@@ -12,7 +12,7 @@ setuptools.setup(
                 'database tested by oatts.',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/RedHatInsights/insights-connexion',
+    url='https://github.com/RedHatInsights/insights_connexion',
     packages=setuptools.find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',
