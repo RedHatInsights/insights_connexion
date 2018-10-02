@@ -25,7 +25,6 @@ Required Project Structure
 **app.py**
 ```
 import insights_connexion.app as app
-
 app.start()
 ```
 
@@ -37,6 +36,11 @@ This is the Swagger spec for the REST API. It will be used by [Connexion](https:
 
 This is where you will define your tests. The following is an example of how to use this package's OATTS test runner
 
+```
+import insights_connexion.test.oatts as oatts
+oatts.test()
+```
+
 
 **test/values.json**
 
@@ -44,7 +48,7 @@ This is passed to oatts --customValuesFile. See [oatts](https://github.com/googl
 
 **db/models.py**
 
-This is where the SQLAlchemy models are defined. They can be defined anywhere, this location is just an example. Here's an example how to define them:
+This is where the [SQLAlchemy](https://docs.sqlalchemy.org/en/latest/) models are defined. They can be defined anywhere, this location is just an example. The important piece is to use the base class from this package. Here's an example how to define them:
 
 ```
 from insights_connexion.db.base import Base
@@ -59,7 +63,17 @@ class Tag(Base):
 
 **api/**
 
-This is the directory Connexion will look in for the endpoint handling functions. Each endpoint needs a separate file. See the [Connexion routing docs](https://connexion.readthedocs.io/en/latest/routing.html) for details.
+This is the directory Connexion will look in for the endpoint handling functions. Each endpoint needs a separate file. See the [Connexion routing docs](https://connexion.readthedocs.io/en/latest/routing.html) for details. You can access the SQL Alchemy session thru this package, e.g.
+
+```
+from insights_connexion.db.base import session
+from db.models import Tag
+
+def search():
+    tags = session.query(Tag).all()
+    tags_dump = [tag.dump() for tag in tags]
+    return {'count': 0, 'results': tags_dump}
+```
 
 **config.ini**
 
