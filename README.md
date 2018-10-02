@@ -22,29 +22,28 @@ Required Project Structure
   - test.py
   - values.json
 
-app.py
---------------------
+**app.py**
 ```
 import insights_connexion.app as app
 
 app.start()
 ```
 
-swagger/api.spec.yaml
---------------------
+**swagger/api.spec.yaml**
+
 This is the Swagger spec for the REST API. It will be used by [Connexion](https://github.com/zalando/connexion/) to automatically serve and validate the routes.
 
-test/test.py
---------------------
+**test/test.py**
+
 This is where you will define your tests. The following is an example of how to use this package's OATTS test runner
 
 
-test/values.json
---------------------
+**test/values.json**
+
 This is passed to oatts --customValuesFile. See [oatts](https://github.com/google/oatts) for details.
 
-db/models.py
---------------------
+**db/models.py**
+
 This is where the SQLAlchemy models are defined. They can be defined anywhere, this location is just an example. Here's an example how to define them:
 
 ```
@@ -58,12 +57,12 @@ class Tag(Base):
     id = Column(String, primary_key=True)
 ```
 
-api/
---------------------
+**api/**
+
 This is the directory Connexion will look in for the endpoint handling functions. Each endpoint needs a separate file. See the [Connexion routing docs](https://connexion.readthedocs.io/en/latest/routing.html) for details.
 
-config.ini
---------------------
+**config.ini**
+
 This contains all the application's configuration parameters. Each environment gets a separate section, e.g. dev, qa, prod. It requires at least the following parameters in the [DEFAULT] section (substituting the values for your app):
 ```
 [DEFAULT]

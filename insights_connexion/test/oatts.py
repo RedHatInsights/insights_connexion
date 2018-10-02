@@ -51,7 +51,7 @@ server_process = None
 def start_server():
     global server_process
     env = os.environ.copy()
-    env['PORT'] = str(PORT)
+    env['INSIGHTS_CONNEXION_ENV'] = 'test'
     server_process = Popen(['pipenv', 'run', 'server'], env=env)
     sleep(5)
 
