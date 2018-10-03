@@ -4,12 +4,12 @@ from connexion.resolver import RestyResolver
 from connexion.decorators.response import ResponseValidator
 from connexion.exceptions import NonConformingResponseBody, NonConformingResponseHeaders
 from .db import base as db
-import distutils
 from flask import Response
 from http import HTTPStatus
 import json
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
+from . import util
 
 
 # By default validate_response will return the full stack trace to the client.
@@ -26,7 +26,7 @@ session = db.init()
 validator_map = {
     'response': CustomResponseValidator
 }
-debug = distutils.util.strtobool(config.debug)
+debug = util.string_to_bool(config.debug)
 app = connexion.App('tag',
                     specification_dir='swagger/',
                     validator_map=validator_map,
