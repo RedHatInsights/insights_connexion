@@ -4,6 +4,7 @@ from connexion.resolver import RestyResolver
 from connexion.decorators.response import ResponseValidator
 from connexion.exceptions import NonConformingResponseBody, NonConformingResponseHeaders
 from .db import base as db
+import distutils
 from flask import Response
 from http import HTTPStatus
 import json
@@ -25,10 +26,11 @@ session = db.init()
 validator_map = {
     'response': CustomResponseValidator
 }
+debug = distutils.util.strtobool(config.debug)
 app = connexion.App('tag',
                     specification_dir='swagger/',
                     validator_map=validator_map,
-                    debug=config.debug)
+                    debug=debug)
 app.add_api('api.spec.yaml', resolver=RestyResolver(
     'api'), validate_responses=True)
 
