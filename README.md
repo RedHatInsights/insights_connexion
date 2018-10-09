@@ -11,16 +11,61 @@ pipenv install -e "git+git://github.com/RedHatInsights/insights_connexion.git#eg
 
 Required Project Structure
 --------------------
+- alembic.ini
 - api/
 - app.py
 - config.ini
 - db/
+  - versions/
   - models.py
 - swagger/ 
   - api.spec.yaml
 - test/
   - test.py
   - values.json
+
+**alembic.ini**
+This is the ini to configure [alembic migrations](https://alembic.zzzcomputing.com/en/latest/tutorial.html#the-migration-environment). The following example will work out of the box:
+
+```
+[alembic]
+script_location = insights_connexion:db/migrations
+version_locations = ./db/versions
+
+[loggers]
+keys = root,sqlalchemy,alembic
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARN
+handlers = console
+qualname =
+
+[logger_sqlalchemy]
+level = WARN
+handlers =
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+```
 
 **app.py**
 ```
@@ -61,6 +106,10 @@ class Tag(Base):
     id = Column(String, primary_key=True)
 ```
 
+**db/versions**
+
+This is where the database migration scripts live. See the [alembic doc](https://alembic.zzzcomputing.com/en/latest/tutorial.html#create-a-migration-script) for more info on generating migration scripts.
+
 **api/**
 
 This is the directory Connexion will look in for the endpoint handling functions. Each endpoint needs a separate file. See the [Connexion routing docs](https://connexion.readthedocs.io/en/latest/routing.html) for details. You can access the SQL Alchemy session thru this package, e.g.
@@ -90,12 +139,21 @@ debug = True
 port = 8080
 db_pool_size = 30
 db_max_overflow = 100
-
 ```
 
-Migrations
+Each specific environment can override the defaults in a separate section, e.g.
+```
+[test]
+db_name = tagservicetest
+port = 8081
+
+[qa]
+db_password = qadbpassword
+```
+
+Migrating the Database
 --------------------
-Migrations should be managed by alembic. Follow the [alembic doc](https://alembic.zzzcomputing.com/en/latest/tutorial.html#the-migration-environment) to initialize the directory structure and create the database migration scripts.
+`pipenv run alembic upgrade head`
 
 Running The App
 --------------------

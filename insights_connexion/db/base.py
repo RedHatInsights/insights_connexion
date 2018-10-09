@@ -4,9 +4,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 Base = declarative_base()
+session = None
 
 
 def init():
+    global session
     engine = create_engine(
         'postgresql://{}:{}@{}:{}/{}'.format(config.db_user, config.db_password,
                                              config.db_host, config.db_port, config.db_name),
@@ -17,6 +19,3 @@ def init():
     Base.query = session.query_property()
     Base.metadata.create_all(engine)
     return session
-
-
-session = init()
