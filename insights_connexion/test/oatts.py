@@ -31,6 +31,13 @@ def _create_db():
 
 def _migrate_db():
     alembic_cfg = AlembicConfig('./alembic.ini')
+    alembic_cfg.set_main_option(
+        'sqlalchemy.url',
+        'postgresql://{}:{}@{}:{}/{}'.format(config.db_user,
+                                             config.db_password,
+                                             config.db_host,
+                                             config.db_port,
+                                             config.db_name))
     alembic_cmd.upgrade(alembic_cfg, 'head')
 
 
