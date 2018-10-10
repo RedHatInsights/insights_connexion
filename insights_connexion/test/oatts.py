@@ -30,14 +30,8 @@ def _create_db():
 
 
 def _migrate_db():
+    logging.info('Migrating database...')
     alembic_cfg = AlembicConfig('./alembic.ini')
-    alembic_cfg.set_main_option(
-        'sqlalchemy.url',
-        'postgresql://{}:{}@{}:{}/{}'.format(config.db_user,
-                                             config.db_password,
-                                             config.db_host,
-                                             config.db_port,
-                                             config.db_name))
     alembic_cmd.upgrade(alembic_cfg, 'head')
 
 
@@ -87,6 +81,7 @@ server_process = None
 
 
 def _start_server():
+    logging.info('Starting server process...')
     global server_process
     env = os.environ.copy()
     env['INSIGHTS_CONNEXION_ENV'] = 'test'
