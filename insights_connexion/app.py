@@ -2,6 +2,7 @@ from .config import config
 import connexion
 from connexion.resolver import RestyResolver
 from connexion.decorators.response import ResponseValidator
+from connexion.decorators.validation import RequestBodyValidator
 from connexion.exceptions import NonConformingResponseBody, NonConformingResponseHeaders
 from .db import base as db
 from jsonschema import ValidationError
@@ -20,9 +21,18 @@ class CustomResponseValidator(ResponseValidator):
             raise Exception()
 
 
+# This enables a custom error message for invalid request bodies to be sent to the client.
+class RequestBodyValidator(RequestBodyValidator):
+    def validate_schema(self, data, url):
+        if self.is_null_value_valid and connexion.utils.is_null(data):
+            return None
+        self.validator.validate(data)
+
+
 session = db.init()
 validator_map = {
-    'response': CustomResponseValidator
+    'response': CustomResponseValidator,
+    'body': RequestBodyValidator
 }
 debug = util.string_to_bool(config.debug)
 app = connexion.App('tag',
