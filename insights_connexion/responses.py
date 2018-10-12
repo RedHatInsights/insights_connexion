@@ -1,20 +1,28 @@
+from flask import Response
 from http import HTTPStatus
+import json
 
 
 def _message(message):
-    return {'message': message}
+    return json.dumps({'message': message})
+
+
+def resource_exists(message=None):
+    if message is None:
+        message = 'Resource exists.'
+    return Response(response=_message(message), status=HTTPStatus.CONFLICT)
 
 
 def not_found(message=None):
     if message is None:
         message = 'Resource not found.'
-    return _message(message), HTTPStatus.NOT_FOUND
+    return Response(response=_message(message), status=HTTPStatus.NOT_FOUND)
 
 
-def invalid_request_body(message=None):
+def invalid_request_parameters(message=None):
     if message is None:
-        message = 'Invalid request body.'
-    return _message(message), HTTPStatus.BAD_REQUEST
+        message = 'Invalid request parameters.'
+    return Response(response=_message(message), status=HTTPStatus.BAD_REQUEST)
 
 
 def delete():

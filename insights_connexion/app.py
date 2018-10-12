@@ -2,14 +2,13 @@ from .config import config
 import connexion
 from connexion.resolver import RestyResolver
 from connexion.decorators.response import ResponseValidator
+from connexion.decorators.validation import RequestBodyValidator
 from connexion.exceptions import NonConformingResponseBody, NonConformingResponseHeaders
 from .db import base as db
-from flask import Response
-from http import HTTPStatus
-import json
+from jsonschema import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
-from . import util
+from . import util, responses
 
 
 # By default validate_response will return the full stack trace to the client.
@@ -22,9 +21,18 @@ class CustomResponseValidator(ResponseValidator):
             raise Exception()
 
 
+# This enables a custom error message for invalid request bodies to be sent to the client.
+class RequestBodyValidator(RequestBodyValidator):
+    def validate_schema(self, data, url):
+        if self.is_null_value_valid and connexion.utils.is_null(data):
+            return None
+        self.validator.validate(data)
+
+
 session = db.init()
 validator_map = {
-    'response': CustomResponseValidator
+    'response': CustomResponseValidator,
+    'body': RequestBodyValidator
 }
 debug = util.string_to_bool(config.debug)
 app = connexion.App('tag',
@@ -32,19 +40,24 @@ app = connexion.App('tag',
                     validator_map=validator_map,
                     debug=debug)
 app.add_api('api.spec.yaml', resolver=RestyResolver(
-    'api'), validate_responses=True)
+    'api'), validate_responses=True, strict_validation=True)
 
 
 def exists_handler(exception):
-    return Response(response=json.dumps({'message': 'Resource exists.'}), status=HTTPStatus.CONFLICT)
+    return responses.resource_exists()
 
 
 def no_result_handler(exception):
-    return Response(response=json.dumps({'message': 'Resource not found.'}), status=HTTPStatus.NOT_FOUND)
+    return responses.not_found()
+
+
+def validation_error_handler(exception):
+    return responses.invalid_request_parameters()
 
 
 app.add_error_handler(NoResultFound, no_result_handler)
 app.add_error_handler(IntegrityError, exists_handler)
+app.add_error_handler(ValidationError, validation_error_handler)
 
 application = app.app
 
