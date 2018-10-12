@@ -1,3 +1,4 @@
+from flask import Response
 from http import HTTPStatus
 
 
@@ -8,30 +9,30 @@ def _message(message):
 def not_found(message=None):
     if message is None:
         message = 'Resource not found.'
-    return _message(message), HTTPStatus.NOT_FOUND
+    return Response(response=_message(message), status=HTTPStatus.NOT_FOUND)
 
 
 def invalid_request_body(message=None):
     if message is None:
         message = 'Invalid request body.'
-    return _message(message), HTTPStatus.BAD_REQUEST
+    return Response(response=_message(message), status=HTTPStatus.BAD_REQUEST)
 
 
 def delete():
-    return HTTPStatus.NO_CONTENT
+    return Response(status=HTTPStatus.NO_CONTENT)
 
 
 def create(body):
-    return body, HTTPStatus.CREATED
+    return Response(response=body, status=HTTPStatus.CREATED)
 
 
 def search(count, entities):
-    return {'count': count, 'results': entities}, HTTPStatus.OK
+    return Response(response={'count': count, 'results': entities}, status=HTTPStatus.OK)
 
 
 def get(entity):
-    return entity, HTTPStatus.OK
+    return Response(response=entity, status=HTTPStatus.OK)
 
 
 def update(entity):
-    return entity, HTTPStatus.OK
+    return Response(response=entity, status=HTTPStatus.OK)

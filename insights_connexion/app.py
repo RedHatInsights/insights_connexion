@@ -2,12 +2,12 @@ from .config import config
 import connexion
 from connexion.resolver import RestyResolver
 from connexion.decorators.response import ResponseValidator
-from connexion.decorators.validation import RequestBodyValidator
 from connexion.exceptions import NonConformingResponseBody, NonConformingResponseHeaders
 from .db import base as db
 from flask import Response
 from http import HTTPStatus
 import json
+from jsonschema import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from . import util
@@ -23,17 +23,9 @@ class CustomResponseValidator(ResponseValidator):
             raise Exception()
 
 
-class CustomRequestBodyValidator(RequestBodyValidator):
-    def validate_schema(self, data, url):
-        response = super().validate_schema(data, url)
-        print(response)
-        return response
-
-
 session = db.init()
 validator_map = {
-    'response': CustomResponseValidator,
-    'body': CustomRequestBodyValidator
+    'response': CustomResponseValidator
 }
 debug = util.string_to_bool(config.debug)
 app = connexion.App('tag',
@@ -52,8 +44,13 @@ def no_result_handler(exception):
     return Response(response=json.dumps({'message': 'Resource not found.'}), status=HTTPStatus.NOT_FOUND)
 
 
+def validation_error_handler(exception):
+    return Response(response=json.dumps({'message': 'Invalid request.'}), status=HTTPStatus.BAD_REQUEST)
+
+
 app.add_error_handler(NoResultFound, no_result_handler)
 app.add_error_handler(IntegrityError, exists_handler)
+app.add_error_handler(ValidationError, validation_error_handler)
 
 application = app.app
 
