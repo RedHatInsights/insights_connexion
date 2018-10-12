@@ -24,8 +24,8 @@ class CustomResponseValidator(ResponseValidator):
 
 
 class CustomRequestBodyValidator(RequestBodyValidator):
-    def validate_schema(self, data):
-        return super().validate_schema()
+    def validate_schema(self, data, url):
+        return super().validate_schema(data, url)
 
 
 session = db.init()
