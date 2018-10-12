@@ -1,10 +1,20 @@
 from http import HTTPStatus
 
 
+def _message(message):
+    return {'message': message}
+
+
 def not_found(message=None):
     if message is None:
         message = 'Resource not found.'
-    return {'message': message}, HTTPStatus.NOT_FOUND
+    return _message(message), HTTPStatus.NOT_FOUND
+
+
+def invalid_request_body(message=None):
+    if message is None:
+        message = 'Invalid request body.'
+    return _message(message), HTTPStatus.BAD_REQUEST
 
 
 def delete():
