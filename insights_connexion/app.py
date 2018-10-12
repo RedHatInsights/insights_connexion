@@ -4,13 +4,10 @@ from connexion.resolver import RestyResolver
 from connexion.decorators.response import ResponseValidator
 from connexion.exceptions import NonConformingResponseBody, NonConformingResponseHeaders
 from .db import base as db
-from flask import Response
-from http import HTTPStatus
-import json
 from jsonschema import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
-from . import util
+from . import util, responses
 
 
 # By default validate_response will return the full stack trace to the client.
@@ -37,15 +34,15 @@ app.add_api('api.spec.yaml', resolver=RestyResolver(
 
 
 def exists_handler(exception):
-    return Response(response=json.dumps({'message': 'Resource exists.'}), status=HTTPStatus.CONFLICT)
+    return responses.resource_exists()
 
 
 def no_result_handler(exception):
-    return Response(response=json.dumps({'message': 'Resource not found.'}), status=HTTPStatus.NOT_FOUND)
+    return responses.not_found()
 
 
 def validation_error_handler(exception):
-    return Response(response=json.dumps({'message': 'Invalid request.'}), status=HTTPStatus.BAD_REQUEST)
+    return responses.invalid_request_parameters()
 
 
 app.add_error_handler(NoResultFound, no_result_handler)
