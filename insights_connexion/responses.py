@@ -26,20 +26,20 @@ def invalid_request_parameters(message=None):
 
 
 def delete():
-    return Response(status=HTTPStatus.NO_CONTENT)
+    return HTTPStatus.NO_CONTENT
 
 
 def create(body):
-    return Response(response=body, status=HTTPStatus.CREATED)
+    return body, HTTPStatus.CREATED
 
 
 def search(count, entities):
-    return Response(response={'count': count, 'results': entities}, status=HTTPStatus.OK)
+    return {'count': count, 'results': entities}, HTTPStatus.OK
 
 
 def get(entity):
-    return Response(response=entity, status=HTTPStatus.OK)
+    return entity, HTTPStatus.OK
 
 
 def update(entity):
-    return Response(response=entity, status=HTTPStatus.OK)
+    return entity, HTTPStatus.OK
