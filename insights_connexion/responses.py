@@ -1,9 +1,10 @@
 from flask import Response
 from http import HTTPStatus
+import json
 
 
 def _message(message):
-    return {'message': message}
+    return json.dumps({'message': message})
 
 
 def resource_exists(message=None):
