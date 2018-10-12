@@ -2,6 +2,7 @@ from .config import config
 import connexion
 from connexion.resolver import RestyResolver
 from connexion.decorators.response import ResponseValidator
+from connexion.decorators.validation import RequestBodyValidator
 from connexion.exceptions import NonConformingResponseBody, NonConformingResponseHeaders
 from .db import base as db
 from flask import Response
@@ -22,9 +23,15 @@ class CustomResponseValidator(ResponseValidator):
             raise Exception()
 
 
+class CustomRequestBodyValidator(RequestBodyValidator):
+    def validate_schema(self, data):
+        return super().validate_schema()
+
+
 session = db.init()
 validator_map = {
-    'response': CustomResponseValidator
+    'response': CustomResponseValidator,
+    'body': CustomRequestBodyValidator
 }
 debug = util.string_to_bool(config.debug)
 app = connexion.App('tag',
@@ -32,7 +39,7 @@ app = connexion.App('tag',
                     validator_map=validator_map,
                     debug=debug)
 app.add_api('api.spec.yaml', resolver=RestyResolver(
-    'api'), validate_responses=True)
+    'api'), validate_responses=True, strict_validation=True)
 
 
 def exists_handler(exception):
