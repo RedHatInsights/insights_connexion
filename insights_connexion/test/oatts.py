@@ -1,6 +1,7 @@
 from alembic import command as alembic_cmd
 from alembic.config import Config as AlembicConfig
 from ..config import config
+from ..db import base
 import logging
 import os
 import shutil
@@ -67,7 +68,7 @@ def _run_oatts():
                         '-w', 'generated-tests',
                         '-s', 'swagger/api.spec.yaml',
                         '--host', 'localhost:{}'.format(PORT),
-                        '--customValuesFile', 'test/values.json'], check=True)
+                        '--customValuesFile', 'oatts.values.json'], check=True)
         subprocess.run(
             ['mocha', '--recursive', 'generated-tests'], check=True)
     except(CalledProcessError):
@@ -87,11 +88,19 @@ def _start_server():
     sleep(5)
 
 
+# this is meant to be overridden by the consuming app
+def seed():
+    logging.info('Skipping seed.')
+    pass
+
+
 def test():
     try:
         logging.info('Testing...')
         _create_db()
         _migrate_db()
+        base.init()
+        seed()
         _start_server()
         _run_oatts()
         logging.info('Testing is done')

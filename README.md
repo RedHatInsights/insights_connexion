@@ -18,11 +18,10 @@ Required Project Structure
 - db/
   - versions/
   - models.py
+- oatts.values.json
 - swagger/ 
   - api.spec.yaml
-- test/
-  - test.py
-  - values.json
+- test.py
 
 **alembic.ini**
 This is the ini to configure [alembic migrations](https://alembic.zzzcomputing.com/en/latest/tutorial.html#the-migration-environment). The following example will work out of the box:
@@ -77,17 +76,35 @@ app.start()
 
 This is the Swagger spec for the REST API. It will be used by [Connexion](https://github.com/zalando/connexion/) to automatically serve and validate the routes.
 
-**test/test.py**
+**test.py**
 
-This is where you will define your tests. The following is an example of how to use this package's OATTS test runner
+This is where you will define your tests. The following is an example of how to use this package's OATTS test runner. It includes a custom seed() function to seed the database before the OATTS suite is executed.
 
 ```
+from db.models import Tag
+import factory
+from insights_connexion.db import base
 import insights_connexion.test.oatts as oatts
+
+
+def seed():
+    class TagFactory(factory.alchemy.SQLAlchemyModelFactory):
+        class Meta:
+            model = Tag
+            sqlalchemy_session = base.session
+            sqlalchemy_session_persistence = 'commit'
+
+        id = 'default'
+
+    TagFactory()
+
+
+oatts.seed = seed
 oatts.test()
 ```
 
 
-**test/values.json**
+**oatts.values.json**
 
 This is passed to oatts --customValuesFile. See [oatts](https://github.com/google/oatts) for details.
 
