@@ -83,20 +83,18 @@ This is where you will define your tests. The following is an example of how to 
 ```
 from db.models import Tag
 import factory
-from insights_connexion.db import base
 import insights_connexion.test.oatts as oatts
 
 
-def seed():
-    class TagFactory(factory.alchemy.SQLAlchemyModelFactory):
-        class Meta:
-            model = Tag
-            sqlalchemy_session = base.session
-            sqlalchemy_session_persistence = 'commit'
+class TagFactory(factory.Factory):
+    class Meta:
+        model = Tag
 
-        id = 'default'
+    id = 'default'
 
-    TagFactory()
+
+async def seed():
+    return (await TagFactory().create())
 
 
 oatts.seed = seed
@@ -110,17 +108,16 @@ This is passed to oatts --customValuesFile. See [oatts](https://github.com/googl
 
 **db/models.py**
 
-This is where the [SQLAlchemy](https://docs.sqlalchemy.org/en/latest/) models are defined. They can be defined anywhere, this location is just an example. The important piece is to use the base class from this package. Here's an example how to define them:
+This is where the [Gino](https://python-gino.readthedocs.io/en/latest/) models are defined. They can be defined anywhere, this location is just an example. The important piece is to use the base class from this package. Here's an example how to define them:
 
 ```
-from insights_connexion.db.base import Base
-from sqlalchemy import Column, String
+from insights_connexion.db.gino import db
 
 
-class Tag(Base):
+class Tag(db.Model):
     __tablename__ = 'tags'
 
-    id = Column(String, primary_key=True)
+    id = db.Column(db.Unicode, primary_key=True)
 ```
 
 **db/versions**
@@ -132,13 +129,14 @@ This is where the database migration scripts live. See the [alembic doc](https:/
 This is the directory Connexion will look in for the endpoint handling functions. Each endpoint needs a separate file. See the [Connexion routing docs](https://connexion.readthedocs.io/en/latest/routing.html) for details. You can access the SQL Alchemy session thru this package, e.g.
 
 ```
-from insights_connexion.db.base import session
 from db.models import Tag
+from insights_connexion import responses
 
-def search():
-    tags = session.query(Tag).all()
-    tags_dump = [tag.dump() for tag in tags]
-    return {'count': 0, 'results': tags_dump}
+async def post(request=None):
+    body = await request.json()
+    tag_to_create = Tag(**body)
+    created_tag = await tag_to_create.create()
+    return responses.create(created_tag.dump())
 ```
 
 **config.ini**
@@ -175,3 +173,7 @@ Migrating the Database
 Running The App
 --------------------
 `pipenv run python app.py`
+
+Running The Tests
+--------------------
+`pipenv run python test.py`
