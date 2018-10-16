@@ -1,6 +1,18 @@
-from flask import Response
+from aiohttp.web import json_response
+import datetime
+from functools import partial
 from http import HTTPStatus
 import json
+
+
+def _dumps(obj):
+    if isinstance(obj, datetime.datetime):
+        return str(obj)
+    raise TypeError('Unable to serialize {!r}'.format(obj))
+
+
+def _response(data=None, status=HTTPStatus.NOT_IMPLEMENTED):
+    return json_response(data=data, status=status, dumps=partial(json.dumps, default=_dumps))
 
 
 def _message(message):
@@ -10,19 +22,19 @@ def _message(message):
 def resource_exists(message=None):
     if message is None:
         message = 'Resource exists.'
-    return Response(response=_message(message), status=HTTPStatus.CONFLICT)
+    return _response(data=_message(message), status=HTTPStatus.CONFLICT)
 
 
 def not_found(message=None):
     if message is None:
         message = 'Resource not found.'
-    return Response(response=_message(message), status=HTTPStatus.NOT_FOUND)
+    return _response(data=_message(message), status=HTTPStatus.NOT_FOUND)
 
 
 def invalid_request_parameters(message=None):
     if message is None:
         message = 'Invalid request parameters.'
-    return Response(response=_message(message), status=HTTPStatus.BAD_REQUEST)
+    return _response(data=_message(message), status=HTTPStatus.BAD_REQUEST)
 
 
 def delete():
@@ -30,16 +42,16 @@ def delete():
 
 
 def create(body):
-    return body, HTTPStatus.CREATED
+    return _response(data=body, status=HTTPStatus.CREATED)
 
 
 def search(count, entities):
-    return {'count': count, 'results': entities}, HTTPStatus.OK
+    return _response(data={'count': count, 'results': entities}, status=HTTPStatus.OK)
 
 
 def get(entity):
-    return entity, HTTPStatus.OK
+    return _response(data=entity, status=HTTPStatus.OK)
 
 
 def update(entity):
-    return entity, HTTPStatus.OK
+    return _response(data=entity, status=HTTPStatus.OK)

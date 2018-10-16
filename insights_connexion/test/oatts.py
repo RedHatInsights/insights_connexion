@@ -1,7 +1,8 @@
 from alembic import command as alembic_cmd
 from alembic.config import Config as AlembicConfig
+import asyncio
 from ..config import config
-from ..db import base
+from ..db import gino
 import logging
 import os
 import shutil
@@ -55,7 +56,7 @@ def _deps_installed():
     return shutil.which('oatts') is not None and shutil.which('mocha') is not None
 
 
-def _run_oatts():
+def _run_oatts(rm_gen_dir_flag):
     logging.info('Running oatts tests...')
     if not _deps_installed():
         logging.error('oatts is not installed! See the README.')
@@ -74,7 +75,8 @@ def _run_oatts():
     except(CalledProcessError):
         logging.error('oatts tests failed!')
     finally:
-        _rm_gen_dir()
+        if rm_gen_dir_flag is True:
+            _rm_gen_dir()
 
 
 server_process = None
@@ -84,28 +86,44 @@ def _start_server():
     global server_process
     env = os.environ.copy()
     env['INSIGHTS_CONNEXION_ENV'] = 'test'
-    server_process = Popen(['pipenv', 'run', 'server'], env=env)
-    sleep(5)
+    server_process = Popen(
+        ['pipenv', 'run', 'python', 'app.py'], env=env)
+    sleep(5)  # TODO: poll for GET /v1 to check if the server is started instead
+
+
+def _db_init(loop):
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(gino.init())
+    loop.close()
+
+
+def _run_seed():
+    logging.info('Seeding...')
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(gino.init())
+    loop.run_until_complete(asyncio.gather(seed()))
+    loop.close()
 
 
 # this is meant to be overridden by the consuming app
-def seed():
+async def seed():
     logging.info('Skipping seed.')
     pass
 
 
-def test():
+# set rm_gen_dir to False to view the generated tests
+def test(rm_gen_dir=True, drop_db=True):
     try:
         logging.info('Testing...')
         _create_db()
         _migrate_db()
-        base.init()
-        seed()
+        _run_seed()
         _start_server()
-        _run_oatts()
+        _run_oatts(rm_gen_dir)
         logging.info('Testing is done')
     except() as err:
         logging.error(err)
     finally:
-        _drop_db()
+        if drop_db is True:
+            _drop_db()
         server_process.terminate()
