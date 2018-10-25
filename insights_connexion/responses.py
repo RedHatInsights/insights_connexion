@@ -19,6 +19,12 @@ def _message(message):
     return {'message': message}
 
 
+def internal_server_error(message=None):
+    if message is None:
+        message = 'Internal server error.'
+    return _response(data=_message(message), status=HTTPStatus.INTERNAL_SERVER_ERROR)
+
+
 def resource_exists(message=None):
     if message is None:
         message = 'Resource exists.'

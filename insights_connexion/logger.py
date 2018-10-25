@@ -1,18 +1,32 @@
 from .config import config
 import logging
-# from pythonjsonlogger import jsonlogger
+from pythonjsonlogger import jsonlogger
+from logging.config import dictConfig
 
-logging.basicConfig(
-    level=config.log_level, format="{'timestamp': '%(asctime)s', 'level': '%(levelname)s', 'message': %(message)s}")
+log_config = {
+    'version': 1,
+    'formatters': {
+        'json': {
+            '()': jsonlogger.JsonFormatter,
+            'fmt': '%(levelname)s %(asctime)s %(message)s',
+        },
+    },
+    'handlers': {
+        'stream': {
+            'level': config.log_level,
+            'formatter': 'json',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'insights_connexion': {
+            'handlers': ['stream'],
+            'level': config.log_level,
+            'propagate': True,
+        }
+    }
+}
 
-log = logging
 
-# _logHandler = logging.StreamHandler()
-# _formatter = jsonlogger.JsonFormatter(
-# '%(message)%(levelname)%(name)%(asctime)')
-# _logHandler.setFormatter(_formatter)
-# _logger = logging.getLogger()
-# _logger.addHandler(_logHandler)
-# _logger.setLevel(config.log_level)
-
-# log = logging
+dictConfig(log_config)
+log = logging.getLogger('insights_connexion')

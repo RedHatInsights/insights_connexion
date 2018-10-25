@@ -1,17 +1,23 @@
 import asyncio
-from .config import config
+import json
+import uuid
+
+from sqlalchemy.orm.exc import NoResultFound
+
 import connexion
-from connexion.resolver import RestyResolver
+from aiohttp import web
+from asyncpg.exceptions import UniqueViolationError
 from connexion.decorators.response import ResponseValidator
 from connexion.decorators.validation import RequestBodyValidator
-from connexion.exceptions import NonConformingResponseBody, NonConformingResponseHeaders
+from connexion.exceptions import (NonConformingResponseBody,
+                                  NonConformingResponseHeaders)
+from connexion.resolver import RestyResolver
+from jsonschema import ValidationError
+
+from . import responses, util
+from .config import config
 from .db import gino as db
-import json
-# from jsonschema import ValidationError
-# from .logger import log
-# from sqlalchemy.exc import IntegrityError
-# from sqlalchemy.orm.exc import NoResultFound
-from . import util, responses
+from .logger import log
 
 
 # By default validate_response will return the full stack trace to the client.
@@ -32,6 +38,58 @@ class RequestBodyValidator(RequestBodyValidator):
         self.validator.validate(data)
 
 
+@web.middleware
+async def error_middleware(request, handler):
+    try:
+        response = await handler(request)
+    except(ValidationError) as e:
+        log.error(e)
+        response = responses.invalid_request_parameters()
+    except(UniqueViolationError) as e:
+        log.error(e)
+        response = responses.resource_exists()
+    except(NoResultFound) as e:
+        log.error(e)
+        response = responses.not_found()
+    except(Exception) as e:
+        log.error(e)
+        response = responses.internal_server_error()
+
+    return response
+
+
+def _items_to_json(items):
+    return {k: v for k, v in items if v is not None}
+
+
+@web.middleware
+async def log_middleware(request, handler):
+    req_id = str(uuid.uuid4())
+    log.info(json.dumps({'type': 'request',
+                         'req_id': req_id,
+                         'body': await request.json() if request.has_body else None,
+                         'cookies': _items_to_json(request.cookies.items()),
+                         'content-type': request.content_type,
+                         'content-length': request.content_length,
+                         'headers': _items_to_json(request.headers.items()),
+                         'method': request.method,
+                         'query': _items_to_json(request.query.items()),
+                         'url': str(request.url)}))
+
+    response = await handler(request)
+
+    log.info(json.dumps({'type': 'response',
+                         'req_id': req_id,
+                         'body': response.text,
+                         'cookies': _items_to_json(response.cookies.items()),
+                         'content_type': response.content_type,
+                         'content_length': response.content_length,
+                         'headers': _items_to_json(response.headers.items()),
+                         'status_code': response.status}))
+
+    return response
+
+
 validator_map = {
     'response': CustomResponseValidator,
     'body': RequestBodyValidator
@@ -41,7 +99,8 @@ debug = util.string_to_bool(config.debug)
 app = connexion.AioHttpApp('__main__',
                            specification_dir='swagger/',
                            validator_map=validator_map,
-                           debug=debug)
+                           debug=debug,
+                           middlewares=[log_middleware, error_middleware])
 app.add_api('api.spec.yaml',
             resolver=RestyResolver('api'),
             validate_responses=True,
@@ -49,28 +108,7 @@ app.add_api('api.spec.yaml',
             pass_context_arg_name='request')
 
 
-def exists_handler(exception):
-    return responses.resource_exists()
-
-
-def no_result_handler(exception):
-    return responses.not_found()
-
-
-def validation_error_handler(exception):
-    return responses.invalid_request_parameters()
-
-
-# app.add_error_handler(NoResultFound, no_result_handler)
-# app.add_error_handler(IntegrityError, exists_handler)
-# app.add_error_handler(ValidationError, validation_error_handler)
-
 application = app.app
-
-
-# @application.teardown_appcontext
-# def shutdown_session(exception=None):
-# session.remove()
 
 
 def _parse_headers(dict_in):
@@ -80,25 +118,6 @@ def _parse_headers(dict_in):
 
 def _parse_params(params):
     return params.to_dict(flat=False)
-
-
-# @application.before_request
-# def before_req():
-    # log.info(msg={'headers': _parse_headers(connexion.request.headers),
-    # 'params': _parse_params(connexion.request.args),
-    # 'body': connexion.request.json,
-    # 'url': connexion.request.url,
-    # 'method': connexion.request.method})
-
-
-# @application.after_request
-# def after_req(res):
-    # log.info(msg={'status_code': res.status_code,
-    # 'headers': _parse_headers(res.headers),
-    # 'content_type': res.content_type,
-    # 'mimetype': res.mimetype,
-    # 'body': res.get_json()})
-    # return res
 
 
 @asyncio.coroutine
