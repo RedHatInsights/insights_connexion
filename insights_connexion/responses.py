@@ -16,7 +16,7 @@ def _response(data=None, status=HTTPStatus.NOT_IMPLEMENTED):
 
 
 def _message(message):
-    return json.dumps({'message': message})
+    return {'message': message}
 
 
 def resource_exists(message=None):
