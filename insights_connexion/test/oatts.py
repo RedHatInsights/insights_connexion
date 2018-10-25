@@ -3,16 +3,13 @@ from alembic.config import Config as AlembicConfig
 import asyncio
 from ..config import config
 from ..db import gino
-import logging
+from ..logger import log
 import os
 import shutil
 from sqlalchemy import create_engine
 import subprocess
 from subprocess import CalledProcessError, Popen
 from time import sleep
-
-logging.basicConfig(
-    level=config.log_level, format='%(asctime)s | %(levelname)s | %(message)s')
 
 PORT = config.port
 
@@ -27,7 +24,7 @@ def _db_command(cmd):
 
 
 def _create_db():
-    logging.info('Creating database: {}'.format(config.db_name))
+    log.info('Creating database: {}'.format(config.db_name))
     _db_command('CREATE database {};'.format(config.db_name))
 
 
@@ -37,7 +34,7 @@ def _migrate_db():
 
 
 def _drop_db():
-    logging.info('Dropping database: {}'.format(config.db_name))
+    log.info('Dropping database: {}'.format(config.db_name))
     _db_command('ALTER DATABASE {} CONNECTION LIMIT 0;'.format(
         config.db_name))
     _db_command('SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = \'{}\';'.format(
@@ -57,9 +54,9 @@ def _deps_installed():
 
 
 def _run_oatts(rm_gen_dir_flag):
-    logging.info('Running oatts tests...')
+    log.info('Running oatts tests...')
     if not _deps_installed():
-        logging.error('oatts is not installed! See the README.')
+        log.error('oatts is not installed! See the README.')
         exit(0)
 
     _rm_gen_dir()
@@ -73,7 +70,7 @@ def _run_oatts(rm_gen_dir_flag):
         subprocess.run(
             ['mocha', '--recursive', 'generated-tests'], check=True)
     except(CalledProcessError):
-        logging.error('oatts tests failed!')
+        log.error('oatts tests failed!')
     finally:
         if rm_gen_dir_flag is True:
             _rm_gen_dir()
@@ -98,7 +95,7 @@ def _db_init(loop):
 
 
 def _run_seed():
-    logging.info('Seeding...')
+    log.info('Seeding...')
     loop = asyncio.get_event_loop()
     loop.run_until_complete(gino.init())
     loop.run_until_complete(asyncio.gather(seed()))
@@ -107,22 +104,22 @@ def _run_seed():
 
 # this is meant to be overridden by the consuming app
 async def seed():
-    logging.info('Skipping seed.')
+    log.info('Skipping seed.')
     pass
 
 
 # set rm_gen_dir to False to view the generated tests
 def test(rm_gen_dir=True, drop_db=True):
     try:
-        logging.info('Testing...')
+        log.info('Testing...')
         _create_db()
         _migrate_db()
         _run_seed()
         _start_server()
         _run_oatts(rm_gen_dir)
-        logging.info('Testing is done')
+        log.info('Testing is done')
     except() as err:
-        logging.error(err)
+        log.error(err)
     finally:
         if drop_db is True:
             _drop_db()

@@ -7,7 +7,10 @@ Installation
 --------------------
 ```
 pipenv install -e "git+git://github.com/RedHatInsights/insights_connexion.git#egg=insights_connexion" -d
+pipenv install -e "git+git://github.com/fijshion/connexion.git@body_middleware_fix#egg=connexion"
 ```
+
+*Note*: The second package is temporary while a [bug fix PR](https://github.com/zalando/connexion/pull/738) is pending. After the bug fix is merged into connexion/master, connexion will be installed from zalando's master.
 
 Required Project Structure
 --------------------
