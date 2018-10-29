@@ -1,7 +1,7 @@
 Insights Connexion
 ===========================================
 
-This is a python package intended to be used as a base for an Insights Platform REST API application. It does all the boilerplate required to use a Postgres database with Connexion/Flask API. 
+This is a python package intended to be used as a base for an Insights Platform REST API application. It does all the boilerplate required to use a Postgres database with Connexion/AIOHTTP API. 
 
 Installation
 --------------------
