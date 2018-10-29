@@ -8,11 +8,11 @@ config_parser = configparser.ConfigParser()
 config_parser.read('config.ini')
 
 if 'test' in sys.argv[0]:
-    tag_env = 'test'
+    env = 'test'
 else:
-    tag_env = os.environ.get('INSIGHTS_CONNEXION_ENV', 'dev')
+    env = os.environ.get('INSIGHTS_CONNEXION_ENV', 'dev')
 
-config = config_parser[tag_env]
+config = config_parser[env]
 
 for key in config:
     try:
