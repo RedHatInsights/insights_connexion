@@ -64,30 +64,34 @@ def _items_to_json(items):
 
 @web.middleware
 async def log_middleware(request, handler):
-    req_id = str(uuid.uuid4())
-    log.info(json.dumps({'type': 'request',
-                         'req_id': req_id,
-                         'body': await request.json() if request.has_body else None,
-                         'cookies': _items_to_json(request.cookies.items()),
-                         'content-type': request.content_type,
-                         'content-length': request.content_length,
-                         'headers': _items_to_json(request.headers.items()),
-                         'method': request.method,
-                         'query': _items_to_json(request.query.items()),
-                         'url': str(request.url)}))
+    try:
+        req_id = str(uuid.uuid4())
+        log.info(json.dumps({'type': 'request',
+                             'req_id': req_id,
+                             'body': await request.json() if request.has_body else None,
+                             'cookies': _items_to_json(request.cookies.items()),
+                             'content-type': request.content_type,
+                             'content-length': request.content_length,
+                             'headers': _items_to_json(request.headers.items()),
+                             'method': request.method,
+                             'query': _items_to_json(request.query.items()),
+                             'url': str(request.url)}))
 
-    response = await handler(request)
+        response = await handler(request)
 
-    log.info(json.dumps({'type': 'response',
-                         'req_id': req_id,
-                         'body': response.text,
-                         'cookies': _items_to_json(response.cookies.items()),
-                         'content_type': response.content_type,
-                         'content_length': response.content_length,
-                         'headers': _items_to_json(response.headers.items()),
-                         'status_code': response.status}))
+        log.info(json.dumps({'type': 'response',
+                             'req_id': req_id,
+                             'body': response.text,
+                             'cookies': _items_to_json(response.cookies.items()),
+                             'content_type': response.content_type,
+                             'content_length': response.content_length,
+                             'headers': _items_to_json(response.headers.items()),
+                             'status_code': response.status}))
 
-    return response
+        return response
+    except(Exception) as e:
+        log.error(e)
+        return responses.internal_server_error()
 
 
 validator_map = {
