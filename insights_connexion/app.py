@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 import uuid
 
 from sqlalchemy.orm.exc import NoResultFound
@@ -97,7 +98,7 @@ validator_map = {
 debug = util.string_to_bool(config.debug)
 
 app = connexion.AioHttpApp('__main__',
-                           specification_dir='swagger/',
+                           specification_dir='{}/swagger/'.format(os.getcwd()),
                            validator_map=validator_map,
                            debug=debug,
                            middlewares=[log_middleware, error_middleware])
