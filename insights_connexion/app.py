@@ -100,7 +100,7 @@ app = connexion.AioHttpApp('__main__',
                            specification_dir='swagger/',
                            validator_map=validator_map,
                            debug=debug,
-                           middlewares=[log_middleware, error_middleware])
+                           middlewares=[error_middleware, log_middleware])
 app.add_api('api.spec.yaml',
             resolver=RestyResolver('api'),
             validate_responses=True,
