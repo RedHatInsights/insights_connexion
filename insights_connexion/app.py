@@ -65,10 +65,17 @@ def _items_to_json(items):
 @web.middleware
 async def log_middleware(request, handler):
     try:
+        try:
+            req_body = await request.json() if request.has_body else None
+        except(Exception) as e:
+            log.error(e)
+            return responses.invalid_request_parameters()
+
         req_id = str(uuid.uuid4())
+
         log.info(json.dumps({'type': 'request',
                              'req_id': req_id,
-                             'body': await request.json() if request.has_body else None,
+                             'body': req_body,
                              'cookies': _items_to_json(request.cookies.items()),
                              'content-type': request.content_type,
                              'content-length': request.content_length,
