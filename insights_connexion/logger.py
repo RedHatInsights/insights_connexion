@@ -1,7 +1,9 @@
-from .config import config
 import logging
-from pythonjsonlogger import jsonlogger
 from logging.config import dictConfig
+
+from pythonjsonlogger import jsonlogger
+
+from .config import config
 
 log_config = {
     'version': 1,
