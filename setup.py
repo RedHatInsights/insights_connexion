@@ -8,8 +8,6 @@ setuptools.setup(
     version='0.0.1',
     author='Chris Kyrouac',
     author_email='ckyrouac@redhat.com',
-    dependency_links=[
-        'https://github.com/fijshion/connexion@body_middleware_fix#egg=connexion'],
     description='Common boilerplate code to use connexion with a postgres '
                 'database tested by oatts.',
     long_description=long_description,
@@ -19,7 +17,6 @@ setuptools.setup(
     install_requires=['aiohttp==3.4.4',
                       'aiohttp-jinja2==1.1.0',
                       'alembic==1.0.1',
-                      'connexion>=1.5.3',
                       'factory-boy==2.11.1',
                       'gino==0.8.0',
                       'gunicorn==19.9.0',
