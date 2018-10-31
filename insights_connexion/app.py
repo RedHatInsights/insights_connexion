@@ -59,10 +59,6 @@ async def error_middleware(request, handler):
     return response
 
 
-def _items_to_json(items):
-    return {k: v for k, v in items if v is not None}
-
-
 @web.middleware
 async def log_middleware(request, handler):
     try:
@@ -73,27 +69,29 @@ async def log_middleware(request, handler):
 
     req_id = str(uuid.uuid4())
 
-    log.info(json.dumps({'type': 'request',
-                         'req_id': req_id,
-                         'body': req_body,
-                         'cookies': _items_to_json(request.cookies.items()),
-                         'content-type': request.content_type,
-                         'content-length': request.content_length,
-                         'headers': _items_to_json(request.headers.items()),
-                         'method': request.method,
-                         'query': _items_to_json(request.query.items()),
-                         'url': str(request.url)}))
+    log.info({'message': req_id,
+              'type': 'request',
+              'req_id': req_id,
+              'body': req_body,
+              'cookies': dict(request.cookies),
+              'content-type': request.content_type,
+              'content-length': request.content_length,
+              'headers': dict(request.headers),
+              'method': request.method,
+              'query': dict(request.query),
+              'url': str(request.url)})
 
     response = await handler(request)
 
-    log.info(json.dumps({'type': 'response',
-                         'req_id': req_id,
-                         'body': response.text,
-                         'cookies': _items_to_json(response.cookies.items()),
-                         'content_type': response.content_type,
-                         'content_length': response.content_length,
-                         'headers': _items_to_json(response.headers.items()),
-                         'status_code': response.status}))
+    log.info({'message': req_id,
+              'type': 'response',
+              'req_id': req_id,
+              'body': response.text,
+              'cookies': dict(response.cookies),
+              'content_type': response.content_type,
+              'content_length': response.content_length,
+              'headers': dict(response.headers),
+              'status_code': response.status})
 
     return response
 
