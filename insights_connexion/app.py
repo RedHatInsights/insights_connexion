@@ -61,6 +61,7 @@ async def error_middleware(request, handler):
 
 @web.middleware
 async def log_middleware(request, handler):
+    log.error('test')
     try:
         req_body = await request.json() if request.has_body else None
     except JSONDecodeError as e:

@@ -10,7 +10,7 @@ log_config = {
     'formatters': {
         'json': {
             '()': jsonlogger.JsonFormatter,
-            'fmt': '%(levelname)s %(asctime)s %(message)s',
+            'fmt': '%(levelname)s %(asctime)s',
         },
     },
     'handlers': {
