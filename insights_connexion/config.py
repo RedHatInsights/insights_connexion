@@ -1,10 +1,10 @@
-import configparser
+from ConfigParser import SafeConfigParser
 import os
 from types import SimpleNamespace
 import sys
 
 
-config_parser = configparser.ConfigParser()
+config_parser = SafeConfigParser(os.environ)
 config_parser.read('config.ini')
 
 if 'test' in sys.argv[0]:
