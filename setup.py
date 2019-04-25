@@ -22,7 +22,7 @@ setuptools.setup(
                       'gunicorn==19.9.0',
                       'psycopg2-binary==2.7.5',
                       'python-json-logger==0.1.9',
-                      'sqlalchemy==1.2.12'],
+                      'sqlalchemy==1.3.3'],
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
