@@ -1,10 +1,17 @@
-from ConfigParser import SafeConfigParser
+import configparser
 import os
 from types import SimpleNamespace
 import sys
 
 
-config_parser = SafeConfigParser(os.environ)
+class EnvInterpolation(configparser.BasicInterpolation):
+    """Interpolation which expands environment variables in values."""
+
+    def before_get(self, parser, section, option, value, defaults):
+        return os.path.expandvars(value)
+
+
+config_parser = configparser.ConfigParser(interpolation=EnvInterpolation())
 config_parser.read('config.ini')
 
 if 'test' in sys.argv[0]:
