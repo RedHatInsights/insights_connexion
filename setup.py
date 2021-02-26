@@ -14,7 +14,7 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     url='https://github.com/RedHatInsights/insights_connexion',
     packages=setuptools.find_packages(),
-    install_requires=['aiohttp==3.4.4',
+    install_requires=['aiohttp==3.7.4',
                       'aiohttp-jinja2==1.1.0',
                       'alembic==1.0.1',
                       'connexion==2.3.0',
